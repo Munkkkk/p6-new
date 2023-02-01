@@ -87,3 +87,31 @@ exports.getAllSauces = (req, res, next) => {
         }
     );
 };
+
+
+exports.like = (req, res, next) => {
+    Sauce.findOne({ _id: req.params.id })
+        .then(sauce => {
+            if (req.body.like == 1) {
+                sauce.likes += 1
+                sauce.usersLiked.push(req.auth.userId)
+            }
+            if (req.body.like == 0) {
+                if (sauce.usersLiked.includes(req.auth.userId)) {
+                    sauce.likes -= 1
+                    sauce.usersLiked = sauce.usersLiked.filter(id => id != req.auth.userId)
+                }
+                else {
+                    sauce.dislikes -= 1
+                    sauce.usersDisliked = sauce.usersDisliked.filter(id => id != req.auth.userId)
+                }
+            }
+            if (req.body.like == -1) {
+                sauce.dislikes += 1
+                sauce.usersDisliked.push(req.auth.userId)
+            }
+            sauce.save()
+                .then(() => { res.status(200).json({ message: 'Sauce sauvegardée !' }) })
+
+        })
+}
