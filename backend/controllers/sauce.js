@@ -93,6 +93,11 @@ exports.like = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
             if (req.body.like == 1) {
+                console.log(req.auth.userId, sauce.usersLiked)
+                if (sauce.usersLiked.includes(req.auth.userId)) {
+                    res.status(409).json({ error: 'Sauce déjà liké par cet utilisateur' })
+                    return;
+                }
                 sauce.likes += 1
                 sauce.usersLiked.push(req.auth.userId)
             }
@@ -107,6 +112,10 @@ exports.like = (req, res, next) => {
                 }
             }
             if (req.body.like == -1) {
+                if (sauce.usersDisliked.includes(req.auth.userId)) {
+                    res.status(409).json({ error: 'Sauce déjà disliké par cet utilisateur' })
+                    return;
+                }
                 sauce.dislikes += 1
                 sauce.usersDisliked.push(req.auth.userId)
             }
